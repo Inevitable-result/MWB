@@ -25,6 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.css">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -80,6 +81,7 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero" id="hero">
+  <div class="hero__grid" id="heroGrid" aria-hidden="true"></div>
   <div class="hero__inner container">
     <div class="hero__copy">
       <p class="label hero__eyebrow"><span class="dot" aria-hidden="true"></span>MWB Labs — Making Business Work Better</p>
@@ -150,6 +152,7 @@
 
 <!-- ============ PROBLEM ============ -->
 <section class="problem" id="problem" aria-labelledby="problem-h">
+  <span class="thread thread--accent" data-thread aria-hidden="true"></span>
   <div class="container problem__grid">
     <div class="problem__copy">
       <p class="label reveal">01 — The friction</p>
@@ -306,6 +309,7 @@
 
 <!-- ============ PROCESS ============ -->
 <section class="process" id="process" aria-labelledby="process-h">
+  <span class="thread" data-thread aria-hidden="true"></span>
   <div class="container">
     <header class="sec-head">
       <p class="label reveal">04 — Process</p>
@@ -346,80 +350,103 @@
   </div>
 </section>
 
-<!-- ============ WORK ============ -->
+<!-- ============ WORK (scroll-driven horizontal story) ============ -->
 <section class="work" id="work" aria-labelledby="work-h">
-  <div class="container">
-    <header class="sec-head">
-      <p class="label reveal">05 — Selected work</p>
-      <h2 class="h2 reveal" id="work-h">We don't just talk about building.</h2>
-      <p class="lead reveal">A look at the kind of systems we design and ship. Each one below is a concept project — our own work, built to show approach rather than to borrow someone else's name.</p>
-    </header>
+  <div class="container work__head">
+    <p class="label reveal">05 &mdash; Selected work</p>
+    <h2 class="h2 reveal" id="work-h">We don't just talk about building.</h2>
+    <p class="lead reveal">Four systems, and the business problem each one removed. Every project here is a concept project &mdash; our own work, built to show approach rather than to borrow someone else's name.</p>
+    <p class="work__meter">
+      <span class="work__idx" id="workIdx">01</span>
+      <span class="work__bar" aria-hidden="true"><i id="workBar"></i></span>
+      <span class="work__total">04</span>
+    </p>
+  </div>
 
-    <div class="projects">
-      <article class="project">
-        <a class="project__media" href="#contact" aria-label="Concept project: centralised operations platform — start a conversation">
-          <span class="project__flag">Concept project</span>
-          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&amp;fit=crop&amp;w=1400&amp;q=80"
-               alt="An open-plan office with people working at shared desks" width="1400" height="933" loading="lazy" decoding="async" data-fallback>
-        </a>
-        <div class="project__body">
-          <p class="project__idx">Project 01</p>
-          <h3 class="project__name">Centralised operations platform</h3>
-          <p class="project__problem">A fragmented manual workflow spread across email, spreadsheets and three disconnected tools.</p>
-          <p class="project__solution">One system: shared records, role-based access, automated handoffs and a live view of every open job.</p>
-          <p class="project__meta">Web · Automation · UI/UX</p>
-          <a class="link" href="#contact">Build something like this <span aria-hidden="true">→</span></a>
-        </div>
-      </article>
+  <div class="work__viewport" id="workViewport">
+    <ol class="work__track" id="workTrack">
 
-      <article class="project project--flip">
-        <a class="project__media" href="#contact" aria-label="Concept project: AI support agent — start a conversation">
-          <span class="project__flag">Concept project</span>
-          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&amp;fit=crop&amp;w=1400&amp;q=80"
-               alt="Close-up of a circuit board with fine traces and components" width="1400" height="933" loading="lazy" decoding="async" data-fallback>
-        </a>
-        <div class="project__body">
-          <p class="project__idx">Project 02</p>
-          <h3 class="project__name">AI agent for customer requests</h3>
-          <p class="project__problem">Every incoming request read, categorised and routed by a person, one at a time.</p>
-          <p class="project__solution">An agent that reads the request, drafts the reply, files it in the right place and escalates only what needs a human.</p>
-          <p class="project__meta">AI · Integrations · Automation</p>
-          <a class="link" href="#contact">Build something like this <span aria-hidden="true">→</span></a>
+      <li class="wcard wcard--wide">
+        <div class="wcard__media">
+          <span class="wcard__flag">Concept project</span>
+          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"
+               alt="An open-plan office with people working at shared desks" width="1200" height="800" loading="lazy" decoding="async" data-fallback>
         </div>
-      </article>
+        <div class="wcard__body">
+          <p class="wcard__idx">01 &middot; Operations</p>
+          <h3 class="wcard__name">Centralised operations platform</h3>
+          <dl class="wcard__facts">
+            <dt>Problem</dt>
+            <dd>A manual workflow spread across email, spreadsheets and three tools that never spoke to each other.</dd>
+            <dt>Solution</dt>
+            <dd class="is-solution">One system: shared records, role-based access, automated handoffs and a live view of every open job.</dd>
+          </dl>
+          <p class="wcard__tags">Web &middot; Automation &middot; UI/UX</p>
+          <a class="link" href="#contact">Build something like this <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
 
-      <article class="project">
-        <a class="project__media" href="#contact" aria-label="Concept project: SaaS product for a service business — start a conversation">
-          <span class="project__flag">Concept project</span>
-          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&amp;fit=crop&amp;w=1400&amp;q=80"
-               alt="A laptop screen showing charts and business analytics" width="1400" height="933" loading="lazy" decoding="async" data-fallback>
-        </a>
-        <div class="project__body">
-          <p class="project__idx">Project 03</p>
-          <h3 class="project__name">SaaS product from a single idea</h3>
-          <p class="project__problem">A service business with a process worth selling and no product to sell it in.</p>
-          <p class="project__solution">A multi-tenant platform with subscriptions, billing, onboarding and an admin console — shipped as a first paying version.</p>
-          <p class="project__meta">SaaS · Product design · Engineering</p>
-          <a class="link" href="#contact">Build something like this <span aria-hidden="true">→</span></a>
+      <li class="wcard">
+        <div class="wcard__media">
+          <span class="wcard__flag">Concept project</span>
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+               alt="Close-up of a circuit board with fine traces and components" width="1000" height="563" loading="lazy" decoding="async" data-fallback>
         </div>
-      </article>
+        <div class="wcard__body">
+          <p class="wcard__idx">02 &middot; AI</p>
+          <h3 class="wcard__name">Agent for customer requests</h3>
+          <dl class="wcard__facts">
+            <dt>Problem</dt>
+            <dd>Every incoming request read, categorised and routed by a person, one at a time.</dd>
+            <dt>Solution</dt>
+            <dd class="is-solution">An agent that drafts the reply, files it correctly and escalates only what needs a human.</dd>
+          </dl>
+          <p class="wcard__tags">AI &middot; Integrations &middot; Automation</p>
+          <a class="link" href="#contact">Build something like this <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
 
-      <article class="project project--flip">
-        <a class="project__media" href="#contact" aria-label="Concept project: field and desk mobile application — start a conversation">
-          <span class="project__flag">Concept project</span>
-          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=1400&amp;q=80"
-               alt="A small team gathered around a table reviewing work together" width="1400" height="933" loading="lazy" decoding="async" data-fallback>
-        </a>
-        <div class="project__body">
-          <p class="project__idx">Project 04</p>
-          <h3 class="project__name">Field app for a distributed team</h3>
-          <p class="project__problem">Work happening on site, paperwork happening days later, back at the office.</p>
-          <p class="project__solution">A mobile app that captures the job where it happens, works offline and syncs straight into the back office.</p>
-          <p class="project__meta">Mobile · Systems · Integrations</p>
-          <a class="link" href="#contact">Build something like this <span aria-hidden="true">→</span></a>
+      <li class="wcard">
+        <div class="wcard__media">
+          <span class="wcard__flag">Concept project</span>
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&amp;fit=crop&amp;w=1000&amp;q=80"
+               alt="A laptop screen showing charts and business analytics" width="1000" height="563" loading="lazy" decoding="async" data-fallback>
         </div>
-      </article>
-    </div>
+        <div class="wcard__body">
+          <p class="wcard__idx">03 &middot; SaaS</p>
+          <h3 class="wcard__name">A product from a single idea</h3>
+          <dl class="wcard__facts">
+            <dt>Problem</dt>
+            <dd>A service business with a process worth selling and no product to sell it in.</dd>
+            <dt>Solution</dt>
+            <dd class="is-solution">A multi-tenant platform with subscriptions, billing, onboarding and an admin console.</dd>
+          </dl>
+          <p class="wcard__tags">SaaS &middot; Product design &middot; Engineering</p>
+          <a class="link" href="#contact">Build something like this <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+
+      <li class="wcard wcard--wide">
+        <div class="wcard__media">
+          <span class="wcard__flag">Concept project</span>
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"
+               alt="A small team gathered around a table reviewing work together" width="1200" height="800" loading="lazy" decoding="async" data-fallback>
+        </div>
+        <div class="wcard__body">
+          <p class="wcard__idx">04 &middot; Mobile</p>
+          <h3 class="wcard__name">Field app for a distributed team</h3>
+          <dl class="wcard__facts">
+            <dt>Problem</dt>
+            <dd>Work happening on site, paperwork happening days later, back at the office.</dd>
+            <dt>Solution</dt>
+            <dd class="is-solution">A mobile app that captures the job where it happens, works offline and syncs into the back office.</dd>
+          </dl>
+          <p class="wcard__tags">Mobile &middot; Systems &middot; Integrations</p>
+          <a class="link" href="#contact">Build something like this <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+
+    </ol>
   </div>
 </section>
 
@@ -563,6 +590,7 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="js/main.js" defer></script>
