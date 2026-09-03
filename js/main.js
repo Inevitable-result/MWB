@@ -32,6 +32,14 @@
 
   var app = { lenis: null, mm: null, refreshQueued: false };
 
+  /* Motion tuning per breakpoint. Mobile gets shorter distances,
+     shorter durations and a later start, so content is on screen
+     before it is asked to animate — the page never looks empty
+     waiting for a stagger chain to finish. */
+  var DESKTOP_TUNE = { y: 24, duration: .7, stagger: .06, start: 'top 88%' };
+  var MOBILE_TUNE = { y: 16, duration: .45, stagger: .04, start: 'top 92%' };
+  var TUNE = DESKTOP_TUNE;
+
   function debounce(fn, wait) {
     var t;
     return function () { clearTimeout(t); t = setTimeout(fn, wait); };
@@ -235,15 +243,15 @@
     var els = typeof targets === 'string' ? $$(targets) : targets;
     if (!els.length) return;
     gsap.fromTo(els,
-      { y: opts.y || 24, autoAlpha: 0 },
+      { y: opts.y != null ? Math.min(opts.y, TUNE.y) : TUNE.y, autoAlpha: 0 },
       {
         y: 0, autoAlpha: 1,
-        duration: opts.duration || .7,
+        duration: opts.duration || TUNE.duration,
         ease: 'power3.out',
-        stagger: opts.stagger || .06,
+        stagger: opts.stagger != null ? Math.min(opts.stagger, TUNE.stagger) : TUNE.stagger,
         scrollTrigger: {
           trigger: opts.trigger || els[0],
-          start: opts.start || 'top 88%',
+          start: opts.start || TUNE.start,
           once: true
         }
       });
@@ -421,17 +429,16 @@
   /* =========================================================
      PROBLEM STORY — scrubbed, so it reads in both directions
      ========================================================= */
-  function initProblemStory() {
+  function initProblemStory(isDesktop) {
     var count = $('#stepCount');
 
+    // On desktop the visual is sticky, so scrubbing reads as a
+    // transformation. On mobile the card scrolls past in one gesture:
+    // scrubbing there would make it play in fragments, so it runs once.
     var tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: '#problemVisual',
-        start: 'top 78%',
-        end: 'bottom 70%',
-        scrub: .7,
-        invalidateOnRefresh: true
-      }
+      scrollTrigger: isDesktop
+        ? { trigger: '#problemVisual', start: 'top 78%', end: 'bottom 70%', scrub: .7, invalidateOnRefresh: true }
+        : { trigger: '#problemVisual', start: 'top 85%', once: true }
     });
 
     tl.fromTo('#flowMess .flow li', { y: 10, autoAlpha: .25 },
@@ -450,7 +457,7 @@
       });
     }
 
-    reveal('.problem__copy > .reveal', { stagger: .07, trigger: '.problem__copy' });
+    reveal('.problem__copy > .reveal', { trigger: '.problem__copy' });
     reveal('.problem__list li', { y: 16, stagger: .05, trigger: '.problem__list' });
   }
 
@@ -558,47 +565,54 @@
   }
 
   /* =========================================================
-     SELECTED WORK — vertical scroll drives horizontal travel
+     SELECTED WORK
+     Two separate strategies, never both at once. matchMedia builds
+     one and reverts it before building the other, so the horizontal
+     track and the mobile deck can never fight over the same nodes.
      ========================================================= */
-  function initSelectedWork(isDesktop) {
+
+  function makeMeter(cards) {
+    var bar = $('#workBar'), idx = $('#workIdx');
+    return function (p) {
+      if (bar) gsap.set(bar, { scaleX: p });
+      if (!idx) return;
+      var n = Math.min(cards.length, Math.max(1, Math.ceil(p * cards.length)));
+      idx.textContent = ('0' + n).slice(-2);
+    };
+  }
+
+  /* The card height is whatever the viewport has left after the nav,
+     the section header and the meter — measured, not guessed, so a
+     720px laptop and a 1440px monitor both get a card that fits. */
+  function measureWorkTrack() {
+    var section = $('#work'), head = $('.work__head');
+    if (!section || !head) return;
+
+    var sectionCS = getComputedStyle(section);
+    var headCS = getComputedStyle(head);
+    var navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 64;
+
+    var used = navH
+      + head.getBoundingClientRect().height
+      + (parseFloat(headCS.marginBottom) || 0)
+      + (parseFloat(sectionCS.paddingTop) || 0)
+      + (parseFloat(sectionCS.paddingBottom) || 0);
+
+    var available = window.innerHeight - used - 16;   // 16 = breathing room
+    var height = Math.max(240, Math.min(560, available));
+    section.style.setProperty('--work-track-h', Math.round(height) + 'px');
+  }
+
+  function initSelectedWorkDesktop(cards, setMeter) {
     var section = $('#work');
     var viewport = $('#workViewport');
     var track = $('#workTrack');
-    var cards = $$('.wcard', track);
-    var bar = $('#workBar');
-    var idx = $('#workIdx');
-    if (!section || !track || !cards.length) return;
 
-    reveal('.work__head .reveal', { trigger: '.work__head' });
-
-    // focusing a card off-screen makes the browser scroll the container,
-    // which desyncs the pinned track. Snap it back.
+    // focusing an off-screen card makes the browser scroll the
+    // container, which desyncs the pinned track
     var onVpScroll = function () { if (viewport.scrollLeft !== 0) viewport.scrollLeft = 0; };
-
-    function setMeter(p) {
-      gsap.set(bar, { scaleX: p });
-      var n = Math.min(cards.length, Math.floor(p * cards.length) + 1);
-      idx.textContent = ('0' + n).slice(-2);
-    }
-
-    if (!isDesktop) {
-      gsap.fromTo(cards, { y: 30, autoAlpha: 0 }, {
-        y: 0, autoAlpha: 1, duration: .65, ease: 'power3.out', stagger: .1,
-        scrollTrigger: { trigger: track, start: 'top 85%', once: true }
-      });
-      cards.forEach(function (card, i) {
-        ScrollTrigger.create({
-          trigger: card, start: 'top 60%', end: 'bottom 40%',
-          onToggle: function (self) { if (self.isActive) setMeter((i + 1) / cards.length); }
-        });
-      });
-      return;
-    }
-
     viewport.addEventListener('scroll', onVpScroll);
 
-    // measured lazily through functions so invalidateOnRefresh re-reads
-    // them after fonts, images or a resize change the track width
     var distance = function () {
       return Math.max(0, track.scrollWidth - viewport.clientWidth);
     };
@@ -620,7 +634,6 @@
       }
     });
 
-    // per-card motion driven by the horizontal tween, not by page scroll
     cards.forEach(function (card) {
       gsap.fromTo($('.wcard__body', card), { y: 26, autoAlpha: 0 }, {
         y: 0, autoAlpha: 1, duration: .5, ease: 'power2.out',
@@ -628,8 +641,8 @@
       });
       var img = $('img', card);
       if (img) {
-        gsap.fromTo(img, { scale: 1.14, xPercent: -3 }, {
-          scale: 1, xPercent: 3, ease: 'none',
+        gsap.fromTo(img, { scale: 1.12, xPercent: -2 }, {
+          scale: 1, xPercent: 2, ease: 'none',
           scrollTrigger: {
             trigger: card, containerAnimation: tween,
             start: 'left right', end: 'right left', scrub: true
@@ -638,16 +651,67 @@
       }
     });
 
-    // the track must be back at x:0 before ScrollTrigger measures widths
-    var resetX = function () { gsap.set(track, { x: 0 }); };
-    ScrollTrigger.addEventListener('refreshInit', resetX);
+    // both run before ScrollTrigger measures anything on a refresh
+    var onRefreshInit = function () {
+      measureWorkTrack();
+      gsap.set(track, { x: 0 });
+    };
+    ScrollTrigger.addEventListener('refreshInit', onRefreshInit);
+    measureWorkTrack();
 
     return function () {
       viewport.removeEventListener('scroll', onVpScroll);
-      ScrollTrigger.removeEventListener('refreshInit', resetX);
+      ScrollTrigger.removeEventListener('refreshInit', onRefreshInit);
       gsap.set(track, { x: 0 });
-      gsap.set(bar, { scaleX: 0 });
+      $('#work').style.removeProperty('--work-track-h');
     };
+  }
+
+  /* Mobile: a deck. The stacking itself is position:sticky in CSS —
+     it is correct in both directions, at any scroll speed, with no
+     JS involved. GSAP only adds the entrance and the depth cue. */
+  function initSelectedWorkMobile(cards, setMeter) {
+    cards.forEach(function (card, i) {
+      gsap.fromTo(card, { y: 36, autoAlpha: 0 }, {
+        y: 0, autoAlpha: 1, duration: .5, ease: 'power2.out',
+        scrollTrigger: { trigger: card, start: 'top 92%', once: true }
+      });
+
+      // the card being covered settles back into the stack.
+      // scale only — y and autoAlpha belong to the entrance above,
+      // and two tweens writing one property is how cards get stuck
+      // half-faded after scrolling up.
+      if (i < cards.length - 1) {
+        gsap.to(card, {
+          scale: .965, ease: 'none',
+          scrollTrigger: {
+            trigger: cards[i + 1],
+            start: 'top 85%',
+            end: 'top 35%',
+            scrub: .4,
+            invalidateOnRefresh: true
+          }
+        });
+      }
+
+      ScrollTrigger.create({
+        trigger: card, start: 'top 55%', end: 'bottom 45%',
+        onToggle: function (self) { if (self.isActive) setMeter((i + 1) / cards.length); }
+      });
+    });
+  }
+
+  function initSelectedWork(isDesktop) {
+    var track = $('#workTrack');
+    var cards = $$('.wcard', track);
+    if (!track || !cards.length) return;
+
+    reveal('.work__head .reveal', { trigger: '.work__head' });
+    var setMeter = makeMeter(cards);
+
+    return isDesktop
+      ? initSelectedWorkDesktop(cards, setMeter)
+      : initSelectedWorkMobile(cards, setMeter);
   }
 
   /* =========================================================
@@ -819,13 +883,15 @@
         return;
       }
 
+      TUNE = c.isDesktop ? DESKTOP_TUNE : MOBILE_TUNE;
+
       var cleanups = [];
 
       initHero();
       initHeroTransition();
       cleanups.push(initMarquee());
       initEditorialMoments();
-      initProblemStory();
+      initProblemStory(c.isDesktop);
       initServices();
       initNeedReveal();
       initProcess();
